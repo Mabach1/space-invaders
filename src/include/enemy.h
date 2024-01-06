@@ -1,16 +1,16 @@
 #pragma once
 
+#include "bullet.h"
 #include "image.h"
 #include "sdl.h"
-#include "bullet.h"
 
 typedef struct Enemy {
-    Image image;
+    Image image;  // this will probably be union of different enemies
     f32 scale;
     f64 x_pos;
     f64 y_pos;
     bool dead;
-    f64 move_cooldown; 
+    f64 move_cooldown;
     i32 dir;
 } Enemy;
 
@@ -22,15 +22,16 @@ void enemy_update(Enemy *enemy, f64 delta_time, i32 window_width, BulletVec *vec
 
 bool enemy_shot(Enemy *enemy, Bullet *bullet);
 
+// enemies will be saved in row major order
 typedef struct EnemyArr {
-    Enemy arr[8];
+    Enemy *ptr;
+    usize rows;
+    usize cols;
+    i32 dir;
 } EnemyArr;
 
-// typedef struct EnemyVec {
-//     Enemy *ptr;
-//     usize len;
-//     usize cap;
-// } EnemyVec;
+void enemy_arr_init(EnemyArr *arr, usize cols, usize rows, Context *context);
+void enemy_arr_destroy(EnemyArr *arr);
 
-// void enemy_vec_init(EnemyVec *vec);
-// void enemy_vec_destroy(EnemyVec *vec);
+void enemy_arr_render(EnemyArr *arr, Context *context);
+void enemy_arr_update(EnemyArr *arr, f64 delta_time, i32 window_width, BulletVec *bullet_vec);

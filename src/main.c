@@ -18,7 +18,8 @@ int main(void) {
     Ship ship = {0};
     ship_init(&ship, image_new("assets/ship.png", game_context.renderer), game_context.window.width / 2, (game_context.window.heigh / 12) * 10);
 
-    Enemy enemy = enemy_new(image_new("assets/enemy.png", game_context.renderer), 100, 100);
+    EnemyArr enemies = {0};
+    enemy_arr_init(&enemies, 8, 4, &game_context);
 
     u64 last = SDL_GetPerformanceCounter();
 
@@ -53,6 +54,12 @@ int main(void) {
                     }
                     case SDLK_SPACE: {
                         ship_shoot(&ship);
+                        break;
+                    }
+                    case SDLK_ESCAPE: {
+                        // this will be changing scene to menu
+                        running = false;
+                        break;
                     }
                 }
             }
@@ -63,12 +70,12 @@ int main(void) {
         last = now;
 
         ship_update(&ship, delta_time);
-        enemy_update(&enemy, delta_time, game_context.window.width, &ship.bullets);
+        enemy_arr_update(&enemies, delta_time, game_context.window.width, &ship.bullets);
 
         SDL_RenderClear(game_context.renderer);
 
         ship_render(&ship, &game_context);
-        enemy_render(&enemy, &game_context);
+        enemy_arr_render(&enemies, &game_context);
 
         SDL_SetRenderDrawColor(game_context.renderer, 0, 0, 0, 255);
 
@@ -79,7 +86,7 @@ int main(void) {
         SDL_RenderPresent(game_context.renderer);
     }
 
-    enemy_delete(&enemy);
+    enemy_arr_destroy(&enemies);
     ship_destroy(&ship);
     sdl_context_destroy(&game_context);
 
