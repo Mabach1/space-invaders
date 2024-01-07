@@ -7,6 +7,8 @@
 #include "include/enemy.h"
 
 int main(void) {
+    srand(time(NULL));
+
     Context game_context = {0};
 
     sdl_context_init(&game_context, "Space Invaders", 1800, 1350);

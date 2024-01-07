@@ -17,8 +17,6 @@ void enemy_render(Enemy *enemy, Context *context) {
 }
 
 void enemy_update(Enemy *enemy, f64 delta_time, i32 window_width, BulletVec *bullet_vec) {
-    // TODO: if the enemy is dead we have to delete it from the array 
-
     for (usize i = 0; i < bullet_vec->len; ++i) {
         if (enemy->dead) {
             break;
@@ -59,6 +57,8 @@ bool enemy_shot(Enemy *enemy, Bullet *bullet) {
 static usize coords(usize row, usize col, usize cols) { return row * cols + col; }
 
 void enemy_arr_init(EnemyArr *arr, usize cols, usize rows, Context *context) {
+    enemy_bullet_vec_init(&arr->bullets);
+
     arr->dir = 1;
 
     arr->cols = cols;
@@ -84,15 +84,22 @@ void enemy_arr_destroy(EnemyArr *arr) {
     for (usize i = 0; i < arr->cols * arr->rows; ++i) {
         enemy_delete(&arr->ptr[i]);
     }
+    free(arr->ptr);
+    enemy_bullet_vec_destroy(&arr->bullets);
 }
 
 void enemy_arr_render(EnemyArr *arr, Context *context) {
+    enemy_bullet_vec_render(&arr->bullets, context);
+
     for (usize i = 0; i < arr->cols * arr->rows; ++i) {
         enemy_render(&arr->ptr[i], context);
     }
 }
 
 void enemy_arr_update(EnemyArr *arr, f64 delta_time, i32 window_width, BulletVec *bullet_vec) {
+    enemy_bullet_shoot(&arr->bullets, arr);
+    enemy_bullet_vec_update(&arr->bullets, delta_time);
+
     for (usize i = 0; i < arr->rows * arr->cols; ++i) {
         enemy_update(&arr->ptr[i], delta_time, window_width, bullet_vec);
     }
@@ -100,6 +107,10 @@ void enemy_arr_update(EnemyArr *arr, f64 delta_time, i32 window_width, BulletVec
     bool dir_changed = false;
 
     for (usize i = 0; i < arr->rows * arr->cols; ++i) {
+        if (arr->ptr[i].dead) {
+            continue;
+        }
+
         if (arr->ptr[i].dir != arr->dir) {
             dir_changed = true;
             arr->dir *= -1;
@@ -116,4 +127,31 @@ void enemy_arr_update(EnemyArr *arr, f64 delta_time, i32 window_width, BulletVec
             arr->ptr[i].dir *= -1; 
         }
     }
+}
+
+void enemy_bullet_shoot(EnemyBulletVec *bullet_vec, EnemyArr *enemies) {
+    if (bullet_vec->cooldown > 0.f) {
+        return;
+    }
+
+    printf("shooting\n");
+
+    bullet_vec->cooldown = 1.5f;
+
+    i32 random_index = rand() % (enemies->rows * enemies->cols);
+
+    while (enemies->ptr[random_index].dead) {
+        random_index = rand() % (enemies->rows * enemies->cols);
+    }
+
+    EnemyBullet new_bullet = {
+        .x_pos = enemies->ptr[random_index].x_pos + (enemies->ptr[random_index].image.width * enemies->ptr[random_index].scale) / 2,
+        .y_pos = enemies->ptr[random_index].y_pos + 5,
+        .width = 8,
+        .height = 50,
+        .color = (SDL_Color) { .r = 0x0, .g = 0xFF, .b = 0x0, .a = 0xFF },
+        .out = false,
+    };
+
+    enemy_bullet_vec_push(bullet_vec, new_bullet);
 }

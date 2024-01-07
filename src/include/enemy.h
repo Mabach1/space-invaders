@@ -1,8 +1,11 @@
 #pragma once
 
+#include <time.h>
+
 #include "bullet.h"
 #include "image.h"
 #include "sdl.h"
+#include "enemy_bullet.h"
 
 typedef struct Enemy {
     Image image;  // this will probably be union of different enemies
@@ -28,6 +31,7 @@ typedef struct EnemyArr {
     usize rows;
     usize cols;
     i32 dir;
+    EnemyBulletVec bullets;
 } EnemyArr;
 
 void enemy_arr_init(EnemyArr *arr, usize cols, usize rows, Context *context);
@@ -35,3 +39,5 @@ void enemy_arr_destroy(EnemyArr *arr);
 
 void enemy_arr_render(EnemyArr *arr, Context *context);
 void enemy_arr_update(EnemyArr *arr, f64 delta_time, i32 window_width, BulletVec *bullet_vec);
+
+void enemy_bullet_shoot(EnemyBulletVec *bullet_vec, EnemyArr *enemies);
