@@ -7,7 +7,7 @@
 typedef struct {
     SDL_Window *ptr;
     i32 width;
-    i32 heigh;
+    i32 height;
 } Window;
 
 typedef struct {

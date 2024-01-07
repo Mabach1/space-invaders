@@ -74,7 +74,7 @@ void enemy_arr_init(EnemyArr *arr, usize cols, usize rows, Context *context) {
             usize index = coords(i, j, cols);
 
             arr->ptr[index] = enemy_new(image, 0, 0);
-            arr->ptr[index].y_pos = 1.2f * (context->window.heigh / 13 + (arr->ptr[index].image.height * arr->ptr[index].scale * i));
+            arr->ptr[index].y_pos = 1.2f * (context->window.height / 13 + (arr->ptr[index].image.height * arr->ptr[index].scale * i));
             arr->ptr[index].x_pos = 1.1f * j * (arr->ptr[index].image.width * arr->ptr[index].scale) + 50.f;
         }
     }
@@ -96,12 +96,12 @@ void enemy_arr_render(EnemyArr *arr, Context *context) {
     }
 }
 
-void enemy_arr_update(EnemyArr *arr, f64 delta_time, i32 window_width, BulletVec *bullet_vec) {
+void enemy_arr_update(EnemyArr *arr, f64 delta_time, Window *window, BulletVec *bullet_vec, Ship *ship) {
     enemy_bullet_shoot(&arr->bullets, arr);
-    enemy_bullet_vec_update(&arr->bullets, delta_time);
+    enemy_bullet_vec_update(&arr->bullets, delta_time, ship, window);
 
     for (usize i = 0; i < arr->rows * arr->cols; ++i) {
-        enemy_update(&arr->ptr[i], delta_time, window_width, bullet_vec);
+        enemy_update(&arr->ptr[i], delta_time, window->height, bullet_vec);
     }
 
     bool dir_changed = false;
@@ -124,7 +124,7 @@ void enemy_arr_update(EnemyArr *arr, f64 delta_time, i32 window_width, BulletVec
 
     for (usize i = 0; i < arr->rows * arr->cols; ++i) {
         if (arr->ptr[i].dir != arr->dir) {
-            arr->ptr[i].dir *= -1; 
+            arr->ptr[i].dir *= -1;
         }
     }
 }
@@ -133,8 +133,6 @@ void enemy_bullet_shoot(EnemyBulletVec *bullet_vec, EnemyArr *enemies) {
     if (bullet_vec->cooldown > 0.f) {
         return;
     }
-
-    printf("shooting\n");
 
     bullet_vec->cooldown = 1.5f;
 
@@ -149,7 +147,7 @@ void enemy_bullet_shoot(EnemyBulletVec *bullet_vec, EnemyArr *enemies) {
         .y_pos = enemies->ptr[random_index].y_pos + 5,
         .width = 8,
         .height = 50,
-        .color = (SDL_Color) { .r = 0x0, .g = 0xFF, .b = 0x0, .a = 0xFF },
+        .color = (SDL_Color){.r = 0x0, .g = 0xFF, .b = 0x0, .a = 0xFF},
         .out = false,
     };
 

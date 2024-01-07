@@ -4,7 +4,7 @@ void sdl_context_init(Context *context, const char *game_name, const i32 width, 
     SDL_Init(SDL_INIT_VIDEO);
 
     context->window.width = width;
-    context->window.heigh = height;
+    context->window.height = height;
     
     context->window.ptr = SDL_CreateWindow(game_name, 0, 0, width, height, SDL_WINDOW_SHOWN);
     assert(context->window.ptr);

@@ -2,9 +2,9 @@
 #include <SDL2/SDL_image.h>
 #include <stdbool.h>
 
+#include "include/enemy.h"
 #include "include/sdl.h"
 #include "include/ship.h"
-#include "include/enemy.h"
 
 int main(void) {
     srand(time(NULL));
@@ -13,12 +13,11 @@ int main(void) {
 
     sdl_context_init(&game_context, "Space Invaders", 1800, 1350);
 
-    bool running = true;
 
     SDL_Event event = {0};
 
     Ship ship = {0};
-    ship_init(&ship, image_new("assets/ship.png", game_context.renderer), game_context.window.width / 2, (game_context.window.heigh / 12) * 10);
+    ship_init(&ship, image_new("assets/ship.png", game_context.renderer), game_context.window.width / 2, (game_context.window.height / 12) * 10);
 
     EnemyArr enemies = {0};
     enemy_arr_init(&enemies, 8, 4, &game_context);
@@ -31,6 +30,9 @@ int main(void) {
     };
 
     struct Direction dir = {.pressed = false, .dir = ShipDirRight};
+
+    bool running = true;
+    bool paused = false;
 
     while (running) {
         while (SDL_PollEvent(&event)) {
@@ -60,19 +62,29 @@ int main(void) {
                     }
                     case SDLK_ESCAPE: {
                         // this will be changing scene to menu
-                        running = false;
+                        // running = false;
+                        paused = paused ? false : true;
                         break;
                     }
                 }
             }
         }
 
+   
         u64 now = SDL_GetPerformanceCounter();
         f64 delta_time = (f64)((now - last) / (f64)SDL_GetPerformanceFrequency());
         last = now;
 
+        if (paused) {
+            continue;
+        }
+
         ship_update(&ship, delta_time);
-        enemy_arr_update(&enemies, delta_time, game_context.window.width, &ship.bullets);
+        enemy_arr_update(&enemies, delta_time, &game_context.window, &ship.bullets, &ship);
+
+        if (ship.lives == 0) {
+            running = false;
+        }
 
         SDL_RenderClear(game_context.renderer);
 
