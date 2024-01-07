@@ -13,7 +13,6 @@ int main(void) {
 
     sdl_context_init(&game_context, "Space Invaders", 1800, 1350);
 
-
     SDL_Event event = {0};
 
     Ship ship = {0};
@@ -61,7 +60,7 @@ int main(void) {
                         break;
                     }
                     case SDLK_ESCAPE: {
-                        // this will be changing scene to menu
+                        // TODO: this will be changing scene to menu
                         running = false;
                         // paused = paused ? false : true;
                         break;

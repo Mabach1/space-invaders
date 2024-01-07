@@ -3,12 +3,23 @@
 #include <time.h>
 
 #include "bullet.h"
+#include "enemy_bullet.h"
 #include "image.h"
 #include "sdl.h"
-#include "enemy_bullet.h"
+
+typedef enum AnimationState {
+    STATE_0 = 0,
+    STATE_1 = 1,
+    STATE_2 = 1,
+} AnimationState;
+
+typedef struct EnemyAnimation {
+    Image fames[2];
+    AnimationState state;
+} EnemyAnimation;
 
 typedef struct Enemy {
-    Image image;  // this will probably be union of different enemies
+    EnemyAnimation animation;
     f32 scale;
     f64 x_pos;
     f64 y_pos;
@@ -17,7 +28,10 @@ typedef struct Enemy {
     i32 dir;
 } Enemy;
 
-Enemy enemy_new(Image image, f64 x, f64 y);
+EnemyAnimation enemy_animation_init(Context *context);
+void enemy_animation_destroy(EnemyAnimation *enemy_animation);
+
+Enemy enemy_new(f64 x, f64 y, Context *context);
 void enemy_delete(Enemy *enemy);
 
 void enemy_render(Enemy *enemy, Context *context);

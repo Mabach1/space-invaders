@@ -1,19 +1,47 @@
 #include "include/enemy.h"
 
-Enemy enemy_new(Image image, f64 x, f64 y) { return (Enemy){.image = image, .scale = 0.15, .x_pos = x, .y_pos = y, .dead = false, .move_cooldown = 0.8, .dir = 1}; }
+EnemyAnimation enemy_animation_init(Context *context) {
+    EnemyAnimation animation = {0};
 
-void enemy_delete(Enemy *enemy) { image_delete(&enemy->image); }
+    animation.fames[0] = image_new("assets/enemy_frame_0.png", context->renderer);
+    animation.fames[1] = image_new("assets/enemy_frame_1.png", context->renderer);
+
+    animation.state = STATE_1;
+
+    return animation;
+}
+
+void enemy_animation_destroy(EnemyAnimation *enemy_animation) {
+    image_delete(&enemy_animation->fames[0]);
+    image_delete(&enemy_animation->fames[1]);
+}
+
+Enemy enemy_new(f64 x, f64 y, Context *context) { 
+    return (Enemy){
+        .animation = enemy_animation_init(context), 
+        .scale = 0.15, 
+        .x_pos = x, 
+        .y_pos = y, 
+        .dead = false, 
+        .move_cooldown = 0.8, 
+        .dir = 1
+    }; 
+}
+
+void enemy_delete(Enemy *enemy) { 
+    enemy_animation_destroy(&enemy->animation);
+}
 
 void enemy_render(Enemy *enemy, Context *context) {
     if (enemy->dead) {
         return;
     }
 
-    SDL_Rect src = {.w = enemy->image.width, .h = enemy->image.height, .x = 0, .y = 0};
+    SDL_Rect src = {.w = enemy->animation.fames[enemy->animation.state].width, .h = enemy->animation.fames[enemy->animation.state].height, .x = 0, .y = 0};
 
-    SDL_Rect dst = {.w = enemy->image.width * enemy->scale, .h = enemy->image.height * enemy->scale, .x = enemy->x_pos, .y = enemy->y_pos};
+    SDL_Rect dst = {.w = enemy->animation.fames[enemy->animation.state].width * enemy->scale, .h = enemy->animation.fames[enemy->animation.state].height * enemy->scale, .x = enemy->x_pos, .y = enemy->y_pos};
 
-    SDL_RenderCopyEx(context->renderer, enemy->image.texture, &src, &dst, 0.f, NULL, SDL_FLIP_NONE);
+    SDL_RenderCopyEx(context->renderer, enemy->animation.fames[enemy->animation.state].texture, &src, &dst, 0.f, NULL, SDL_FLIP_NONE);
 }
 
 void enemy_update(Enemy *enemy, f64 delta_time, i32 window_width, BulletVec *bullet_vec) {
@@ -23,6 +51,7 @@ void enemy_update(Enemy *enemy, f64 delta_time, i32 window_width, BulletVec *bul
         }
 
         enemy->dead = enemy_shot(enemy, &bullet_vec->ptr[i]);
+
         if (enemy->dead) {
             bullet_vec->ptr[i].out = true;
             return;
@@ -35,13 +64,14 @@ void enemy_update(Enemy *enemy, f64 delta_time, i32 window_width, BulletVec *bul
         return;
     }
 
+    enemy->animation.state = (enemy->animation.state + 1) % 2;
     enemy->move_cooldown = 0.8;
 
-    f64 speed = enemy->dir * (enemy->image.width * enemy->scale / 2);
+    f64 speed = enemy->dir * (enemy->animation.fames[0].width * enemy->scale / 2);
 
     enemy->x_pos += speed;
 
-    if (enemy->x_pos + enemy->image.width * enemy->scale + speed >= (f64)window_width || enemy->x_pos <= 0.f - speed) {
+    if (enemy->x_pos + enemy->animation.fames[0].width * enemy->scale + speed >= (f64)window_width || enemy->x_pos <= 0.f - speed) {
         enemy->dir *= -1;
     }
 }
@@ -51,7 +81,7 @@ bool enemy_shot(Enemy *enemy, Bullet *bullet) {
         return false;
     }
 
-    return enemy->dead || (bullet->y_pos <= enemy->y_pos + enemy->image.height * enemy->scale && bullet->x_pos >= enemy->x_pos && bullet->x_pos <= enemy->x_pos + enemy->image.width * enemy->scale);
+    return enemy->dead || (bullet->y_pos <= enemy->y_pos + enemy->animation.fames[0].height * enemy->scale && bullet->x_pos >= enemy->x_pos && bullet->x_pos <= enemy->x_pos + enemy->animation.fames[0].width * enemy->scale);
 }
 
 static usize coords(usize row, usize col, usize cols) { return row * cols + col; }
@@ -67,15 +97,13 @@ void enemy_arr_init(EnemyArr *arr, usize cols, usize rows, Context *context) {
     arr->ptr = malloc(sizeof(Enemy) * rows * cols);
     assert(arr->ptr);
 
-    Image image = image_new("assets/enemy.png", context->renderer);
-
     for (usize i = 0; i < rows; ++i) {
         for (usize j = 0; j < cols; ++j) {
             usize index = coords(i, j, cols);
 
-            arr->ptr[index] = enemy_new(image, 0, 0);
-            arr->ptr[index].y_pos = 1.2f * (context->window.height / 13 + (arr->ptr[index].image.height * arr->ptr[index].scale * i));
-            arr->ptr[index].x_pos = 1.1f * j * (arr->ptr[index].image.width * arr->ptr[index].scale) + 50.f;
+            arr->ptr[index] = enemy_new(0, 0, context);
+            arr->ptr[index].y_pos = 1.2f * (context->window.height / 13 + (arr->ptr[index].animation.fames[0].height * arr->ptr[index].scale * i));
+            arr->ptr[index].x_pos = 1.1f * j * (arr->ptr[index].animation.fames[0].width * arr->ptr[index].scale) + 50.f;
         }
     }
 }
@@ -144,7 +172,7 @@ void enemy_bullet_shoot(EnemyBulletVec *bullet_vec, EnemyArr *enemies) {
     }
 
     EnemyBullet new_bullet = {
-        .x_pos = enemies->ptr[random_index].x_pos + (enemies->ptr[random_index].image.width * enemies->ptr[random_index].scale) / 2,
+        .x_pos = enemies->ptr[random_index].x_pos + (enemies->ptr[random_index].animation.fames[0].width * enemies->ptr[random_index].scale) / 2,
         .y_pos = enemies->ptr[random_index].y_pos + 5,
         .width = 8,
         .height = 50,
