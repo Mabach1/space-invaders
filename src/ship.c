@@ -2,7 +2,7 @@
 
 static const f32 SHIP_SCALE = 0.3;
 
-void ship_init(Ship *ship, Image image, u32 x, u32 y) {
+void ship_init(Ship *ship, Image image, f64 x, f64 y) {
     ship->image = image;
     ship->scale = SHIP_SCALE;
     ship->x_pos = x;
@@ -83,4 +83,26 @@ void ship_shot(Ship *ship, i32 window_width) {
     ship->lives -= 1;
     ship->dead = true;
     ship->x_pos = window_width / 25;
+}
+
+void ship_display_lives(Ship *ship, Context *context) {
+    if (ship->lives == 1) {
+        return;
+    }
+
+    Ship lives[2];
+
+    i32 ship_height = ship->image.height * ship->scale;
+    i32 ship_width = ship->image.width * ship->scale;
+
+    ship_init(&lives[0], image_new("assets/ship.png", context->renderer), 10.f, context->window.height - ship_height - 10.f);
+    ship_init(&lives[1], image_new("assets/ship.png", context->renderer), 20.f + ship_width, context->window.height - ship_height - 10.f);
+
+
+    for (i8 i = 0; i < ship->lives - 1; ++i) {
+        ship_render(&lives[i], context);
+    }
+
+    ship_destroy(&lives[0]);
+    ship_destroy(&lives[1]);
 }

@@ -97,11 +97,12 @@ void enemy_arr_render(EnemyArr *arr, Context *context) {
 }
 
 void enemy_arr_update(EnemyArr *arr, f64 delta_time, Window *window, BulletVec *bullet_vec, Ship *ship) {
+
     enemy_bullet_shoot(&arr->bullets, arr);
     enemy_bullet_vec_update(&arr->bullets, delta_time, ship, window);
 
     for (usize i = 0; i < arr->rows * arr->cols; ++i) {
-        enemy_update(&arr->ptr[i], delta_time, window->height, bullet_vec);
+        enemy_update(&arr->ptr[i], delta_time, window->width, bullet_vec);
     }
 
     bool dir_changed = false;

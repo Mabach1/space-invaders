@@ -25,7 +25,7 @@ typedef enum ShipDir {
     ShipDirRight,
 } ShipDir;
 
-void ship_init(Ship *ship, Image image, u32 x, u32 y);
+void ship_init(Ship *ship, Image image, f64 x, f64 y);
 void ship_destroy(Ship *ship);
 
 void ship_render(Ship *ship, Context *context);
@@ -35,3 +35,4 @@ void ship_shoot(Ship *ship);
 void ship_update(Ship *ship, f64 delta_time);
 
 void ship_shot(Ship *ship, i32 window_width);
+void ship_display_lives(Ship *ship, Context *context);

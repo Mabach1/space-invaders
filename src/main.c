@@ -62,15 +62,14 @@ int main(void) {
                     }
                     case SDLK_ESCAPE: {
                         // this will be changing scene to menu
-                        // running = false;
-                        paused = paused ? false : true;
+                        running = false;
+                        // paused = paused ? false : true;
                         break;
                     }
                 }
             }
         }
 
-   
         u64 now = SDL_GetPerformanceCounter();
         f64 delta_time = (f64)((now - last) / (f64)SDL_GetPerformanceFrequency());
         last = now;
@@ -88,7 +87,9 @@ int main(void) {
 
         SDL_RenderClear(game_context.renderer);
 
+        ship_display_lives(&ship, &game_context);
         ship_render(&ship, &game_context);
+
         enemy_arr_render(&enemies, &game_context);
 
         SDL_SetRenderDrawColor(game_context.renderer, 0, 0, 0, 255);
