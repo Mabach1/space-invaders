@@ -5,6 +5,7 @@
 #include "include/enemy.h"
 #include "include/sdl.h"
 #include "include/ship.h"
+#include "include/roadblock.h"
 
 int main(void) {
     srand(time(NULL));
@@ -20,6 +21,9 @@ int main(void) {
 
     EnemyArr enemies = {0};
     enemy_arr_init(&enemies, 8, 4, &game_context);
+
+    Roadblock roadblock = {0};
+    roadblock_init(&roadblock, 250.f, 1350.f - 450.f);
 
     u64 last = SDL_GetPerformanceCounter();
 
@@ -86,6 +90,8 @@ int main(void) {
 
         SDL_RenderClear(game_context.renderer);
 
+        roadblock_render(&roadblock, &game_context);
+
         ship_display_lives(&ship, &game_context);
         ship_render(&ship, &game_context);
 
@@ -100,6 +106,7 @@ int main(void) {
         SDL_RenderPresent(game_context.renderer);
     }
 
+    roadblock_destroy(&roadblock);
     enemy_arr_destroy(&enemies);
     ship_destroy(&ship);
     sdl_context_destroy(&game_context);
