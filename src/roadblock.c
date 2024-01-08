@@ -69,18 +69,18 @@ void roadblock_destroy(Roadblock *roadblock) {
     free(roadblock->texture);
 }
 
-static void roadblock_debug(Roadblock *roadblock) {
-    system("clear");
-    for (usize i = 0; i < roadblock->rows; ++i) {
-        for (usize j = 0; j < roadblock->cols; ++j) {
-            printf("%u ", roadblock->matrix[coords(i, j, roadblock->cols)]);
-        }
-        printf("\n");
-    }
-}
+// static void roadblock_debug(Roadblock *roadblock) {
+//     system("clear");
+//     for (usize i = 0; i < roadblock->rows; ++i) {
+//         for (usize j = 0; j < roadblock->cols; ++j) {
+//             printf("%u ", roadblock->matrix[coords(i, j, roadblock->cols)]);
+//         }
+//         printf("\n");
+//     }
+// }
 
 void roadblock_render(Roadblock *roadblock, Context *context) {
-    roadblock_debug(roadblock);
+    // roadblock_debug(roadblock);
 
     for (usize i = 0; i < roadblock->cols * roadblock->rows; ++i) {
         SDL_Rect rect = {.w = roadblock->texture[i].dimension, .h = roadblock->texture[i].dimension, .x = roadblock->texture[i].x_pos, .y = roadblock->texture[i].y_pos};
@@ -145,4 +145,33 @@ static void roadblock_check_enemy_bullets(Roadblock *roadblock, EnemyBulletVec *
 void roadblock_update(Roadblock *roadblock, BulletVec *bullets, EnemyBulletVec *enemy_bullets) {
     roadblock_check_bullets(roadblock, bullets);
     roadblock_check_enemy_bullets(roadblock, enemy_bullets);
+}
+
+void barricade_init(Barricade *barricade, Window *window) {
+    barricade->number_of = 4;
+    barricade->ptr = (Roadblock *)malloc(sizeof(Roadblock) * barricade->number_of);
+
+    i32 right_offset = window->width / 20;
+    
+    for (usize i = 0; i < barricade->number_of; ++i) {
+        roadblock_init(&barricade->ptr[i], (i + 1) *right_offset + (i * 15.f * 21), window->height - 550.f);
+    }
+}
+
+void barricade_destroy(Barricade *barricade) {
+    for (usize i = 0; i < barricade->number_of; ++i) {
+        roadblock_destroy(&barricade->ptr[i]);
+    }
+}
+
+void barricade_update(Barricade *barricade, BulletVec *bullets, EnemyBulletVec *enemy_bullets) {
+    for (usize i = 0; i < barricade->number_of; ++i) {
+        roadblock_update(&barricade->ptr[i], bullets, enemy_bullets);
+    }
+}
+
+void barricade_render(Barricade *barricade, Context *context) {
+    for (usize i = 0; i < barricade->number_of; ++i) {
+        roadblock_render(&barricade->ptr[i], context);
+    }
 }

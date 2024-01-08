@@ -22,8 +22,8 @@ int main(void) {
     EnemyArr enemies = {0};
     enemy_arr_init(&enemies, 8, 4, &game_context);
 
-    Roadblock roadblock = {0};
-    roadblock_init(&roadblock, 250.f, 1350.f - 550.f);
+    Barricade barricade = {0};
+    barricade_init(&barricade, &game_context.window);
 
     u64 last = SDL_GetPerformanceCounter();
 
@@ -83,7 +83,7 @@ int main(void) {
 
         ship_update(&ship, delta_time);
         enemy_arr_update(&enemies, delta_time, &game_context.window, &ship.bullets, &ship);
-        roadblock_update(&roadblock, &ship.bullets, &enemies.bullets);
+        barricade_update(&barricade, &ship.bullets, &enemies.bullets);
 
         if (ship.lives == 0) {
             running = false;
@@ -91,7 +91,7 @@ int main(void) {
 
         SDL_RenderClear(game_context.renderer);
 
-        roadblock_render(&roadblock, &game_context);
+        barricade_render(&barricade, &game_context);
 
         ship_display_lives(&ship, &game_context);
         ship_render(&ship, &game_context);
@@ -107,7 +107,7 @@ int main(void) {
         SDL_RenderPresent(game_context.renderer);
     }
 
-    roadblock_destroy(&roadblock);
+    barricade_destroy(&barricade);
     enemy_arr_destroy(&enemies);
     ship_destroy(&ship);
     sdl_context_destroy(&game_context);

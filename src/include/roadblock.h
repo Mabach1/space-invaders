@@ -30,3 +30,14 @@ void roadblock_destroy(Roadblock *roadblock);
 
 void roadblock_render(Roadblock *roadblock, Context *context);
 void roadblock_update(Roadblock *roadblock, BulletVec *bullets, EnemyBulletVec *enemy_bullets);
+
+typedef struct {
+    Roadblock *ptr;
+    usize number_of;
+} Barricade;
+
+void barricade_init(Barricade *barricade, Window *window);
+void barricade_destroy(Barricade *barricade);
+
+void barricade_update(Barricade *barricade, BulletVec *bullets, EnemyBulletVec *enemy_bullets);
+void barricade_render(Barricade *barricade, Context *context);
