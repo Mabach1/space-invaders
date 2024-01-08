@@ -4,6 +4,8 @@
 
 #include "common.h"
 #include "sdl.h"
+#include "bullet.h"
+#include "enemy_bullet.h"
 
 typedef struct Block {
     f32 x_pos;
@@ -15,7 +17,7 @@ typedef struct Block {
 Block block_new(f32 x, f32 y, i32 dimension, SDL_Color color);
 
 typedef struct {
-    u8 *matrix;
+    u32 *matrix;
     usize rows;
     usize cols;
     f32 x_pos;
@@ -27,3 +29,4 @@ void roadblock_init(Roadblock *roadblock, f32 x, f32 y);
 void roadblock_destroy(Roadblock *roadblock);
 
 void roadblock_render(Roadblock *roadblock, Context *context);
+void roadblock_update(Roadblock *roadblock, BulletVec *bullets, EnemyBulletVec *enemy_bullets);

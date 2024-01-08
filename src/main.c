@@ -23,7 +23,7 @@ int main(void) {
     enemy_arr_init(&enemies, 8, 4, &game_context);
 
     Roadblock roadblock = {0};
-    roadblock_init(&roadblock, 250.f, 1350.f - 450.f);
+    roadblock_init(&roadblock, 250.f, 1350.f - 550.f);
 
     u64 last = SDL_GetPerformanceCounter();
 
@@ -83,6 +83,7 @@ int main(void) {
 
         ship_update(&ship, delta_time);
         enemy_arr_update(&enemies, delta_time, &game_context.window, &ship.bullets, &ship);
+        roadblock_update(&roadblock, &ship.bullets, &enemies.bullets);
 
         if (ship.lives == 0) {
             running = false;

@@ -44,7 +44,7 @@ static void delete_at_index(BulletVec *vec, usize index) {
 
 void bullet_vec_update(BulletVec *vec, f64 delta_time) {
     for (usize i = 0; i < vec->len; ++i) {
-        if (vec->ptr[i].y_pos <= 0.f) {
+        if (vec->ptr[i].y_pos <= 0.f || vec->ptr[i].out) {
             delete_at_index(vec, i);
             continue;
         }
