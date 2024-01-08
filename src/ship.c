@@ -41,8 +41,6 @@ void ship_render(Ship *ship, Context *context) {
         return;
     }
 
-    printf("number of lives: %d\n", ship->lives);
-
     SDL_Rect src = {.w = ship->image.width, .h = ship->image.height, .x = 0, .y = 0};
 
     SDL_Rect dst = {.w = ship->image.width * ship->scale, .h = ship->image.height * ship->scale, .x = ship->x_pos, .y = ship->y_pos};

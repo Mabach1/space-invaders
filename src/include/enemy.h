@@ -10,11 +10,11 @@
 typedef enum AnimationState {
     STATE_0 = 0,
     STATE_1 = 1,
-    STATE_2 = 1,
+    STATE_2 = 2,
 } AnimationState;
 
 typedef struct EnemyAnimation {
-    Image fames[2];
+    Image fames[3];
     AnimationState state;
 } EnemyAnimation;
 
@@ -26,6 +26,7 @@ typedef struct Enemy {
     bool dead;
     f64 move_cooldown;
     i32 dir;
+    bool death_animation_played;
 } Enemy;
 
 EnemyAnimation enemy_animation_init(Context *context);

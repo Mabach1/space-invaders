@@ -5,6 +5,7 @@ EnemyAnimation enemy_animation_init(Context *context) {
 
     animation.fames[0] = image_new("assets/enemy_frame_0.png", context->renderer);
     animation.fames[1] = image_new("assets/enemy_frame_1.png", context->renderer);
+    animation.fames[2] = image_new("assets/enemy_frame_2.png", context->renderer);
 
     animation.state = STATE_1;
 
@@ -14,6 +15,7 @@ EnemyAnimation enemy_animation_init(Context *context) {
 void enemy_animation_destroy(EnemyAnimation *enemy_animation) {
     image_delete(&enemy_animation->fames[0]);
     image_delete(&enemy_animation->fames[1]);
+    image_delete(&enemy_animation->fames[2]);
 }
 
 Enemy enemy_new(f64 x, f64 y, Context *context) { 
@@ -24,7 +26,8 @@ Enemy enemy_new(f64 x, f64 y, Context *context) {
         .y_pos = y, 
         .dead = false, 
         .move_cooldown = 0.8, 
-        .dir = 1
+        .dir = 1,
+        .death_animation_played = false
     }; 
 }
 
@@ -33,18 +36,18 @@ void enemy_delete(Enemy *enemy) {
 }
 
 void enemy_render(Enemy *enemy, Context *context) {
-    if (enemy->dead) {
+    if (enemy->dead && enemy->death_animation_played) {
         return;
     }
 
     SDL_Rect src = {.w = enemy->animation.fames[enemy->animation.state].width, .h = enemy->animation.fames[enemy->animation.state].height, .x = 0, .y = 0};
-
     SDL_Rect dst = {.w = enemy->animation.fames[enemy->animation.state].width * enemy->scale, .h = enemy->animation.fames[enemy->animation.state].height * enemy->scale, .x = enemy->x_pos, .y = enemy->y_pos};
 
     SDL_RenderCopyEx(context->renderer, enemy->animation.fames[enemy->animation.state].texture, &src, &dst, 0.f, NULL, SDL_FLIP_NONE);
 }
 
 void enemy_update(Enemy *enemy, f64 delta_time, i32 window_width, BulletVec *bullet_vec) {
+
     for (usize i = 0; i < bullet_vec->len; ++i) {
         if (enemy->dead) {
             break;
@@ -54,6 +57,7 @@ void enemy_update(Enemy *enemy, f64 delta_time, i32 window_width, BulletVec *bul
 
         if (enemy->dead) {
             bullet_vec->ptr[i].out = true;
+            enemy->animation.state = STATE_2;
             return;
         }
     }
@@ -64,12 +68,20 @@ void enemy_update(Enemy *enemy, f64 delta_time, i32 window_width, BulletVec *bul
         return;
     }
 
-    enemy->animation.state = (enemy->animation.state + 1) % 2;
-    enemy->move_cooldown = 0.8;
+    if (enemy->animation.state == STATE_2) {
+        enemy->death_animation_played = true;
+    }
+
+    if (enemy->animation.state != STATE_2) {
+        enemy->animation.state = (enemy->animation.state + 1) % 2;
+    }
+
+    enemy->move_cooldown = 1.f;
 
     f64 speed = enemy->dir * (enemy->animation.fames[0].width * enemy->scale / 2);
 
     enemy->x_pos += speed;
+
 
     if (enemy->x_pos + enemy->animation.fames[0].width * enemy->scale + speed >= (f64)window_width || enemy->x_pos <= 0.f - speed) {
         enemy->dir *= -1;
