@@ -74,7 +74,7 @@ void ship_render(Ship *ship, Context *context) {
 }
 
 void ship_shoot(Ship *ship) {
-    if (ship->shoot_cooldown > 0.f) {
+    if (ship->shoot_cooldown > 0.f || ship->dead) {
         return;
     }
 
