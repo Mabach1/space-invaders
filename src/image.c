@@ -12,5 +12,7 @@ Image image_new(const char *image_path, SDL_Renderer *renderer) {
 }
 
 void image_delete(Image *image) {
-    SDL_DestroyTexture(image->texture);
+    if (image) {
+        SDL_DestroyTexture(image->texture);
+    }
 }

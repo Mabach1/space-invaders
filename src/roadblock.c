@@ -169,10 +169,22 @@ void barricade_render(Barricade *barricade, Context *context) {
 #else
 
 Block block_new(const char *prefix_path, SDL_Renderer *renderer, f32 x, f32 y) {
+
     Block block = {0};
 
+    block.scale = 0.15f;
+    block.x_pos = x;
+    block.y_pos = y;
+
+    if (strcmp("nothing", prefix_path) == 0) {
+        block.images = NULL;
+        block.state = BlockState6;
+        return block;
+    }
+
+    block.state = BlockState1;
     block.number_of = 5;
-    block.images = malloc(sizeof(Image) * block.number_of);
+    block.images = (Image *)malloc(sizeof(Image) * block.number_of);
     assert(block.images);
 
     for (usize i = 1; i <= block.number_of; ++i) {
@@ -180,11 +192,6 @@ Block block_new(const char *prefix_path, SDL_Renderer *renderer, f32 x, f32 y) {
         sprintf(file_path, "assets/%s%ld.png", prefix_path, i);
         block.images[i - 1] = image_new(file_path, renderer);
     }
-
-    block.scale = 0.15f;
-    block.x_pos = x;
-    block.y_pos = y;
-    block.state = BlockState1;
 
     return block;
 }
@@ -238,13 +245,12 @@ void roadblock_init(Roadblock *roadblock, f32 x, f32 y, Context *context) {
 
     for (usize i = 0; i < roadblock->rows; ++i) {
         for (usize j = 0; j < roadblock->cols; ++j) {
-            if (strcmp(file_path_prefixes[prefix_index], "nothing") == 0) {
-                prefix_index++;
-                roadblock->blocks[coords(i, j, roadblock->cols)].state = BlockState6;
+            roadblock->blocks[coords(i, j, roadblock->cols)] = block_new(file_path_prefixes[prefix_index++], context->renderer, x, y);
+
+            if (roadblock->blocks[coords(i, j, roadblock->cols)].images == NULL) {
                 continue;
             }
 
-            roadblock->blocks[coords(i, j, roadblock->cols)] = block_new(file_path_prefixes[prefix_index++], context->renderer, x, y);
             roadblock->blocks[coords(i, j, roadblock->cols)].x_pos += (j * roadblock->blocks[0].images[0].width * roadblock->blocks[0].scale);
             roadblock->blocks[coords(i, j, roadblock->cols)].y_pos += (i * roadblock->blocks[0].images[0].height * roadblock->blocks[0].scale);
         }
@@ -339,6 +345,7 @@ void barricade_destroy(Barricade *barricade) {
     for (usize i = 0; i < barricade->number_of; ++i) {
         roadblock_destroy(&barricade->ptr[i]);
     }
+    free(barricade->ptr);
 }
 
 void barricade_update(Barricade *barricade, BulletVec *bullets, EnemyBulletVec *enemy_bullets) {
