@@ -41,11 +41,9 @@ void ship_render(Ship *ship, Context *context) {
         return;
     }
 
-    SDL_Rect src = {.w = ship->image.width, .h = ship->image.height, .x = 0, .y = 0};
-
     SDL_Rect dst = {.w = ship->image.width * ship->scale, .h = ship->image.height * ship->scale, .x = ship->x_pos, .y = ship->y_pos};
 
-    SDL_RenderCopyEx(context->renderer, ship->image.texture, &src, &dst, 0.f, NULL, SDL_FLIP_NONE);
+    SDL_RenderCopyEx(context->renderer, ship->image.texture, NULL, &dst, 0.f, NULL, SDL_FLIP_NONE);
 
     for (usize i = 0; i < ship->bullets.len; ++i) {
         bullet_render(&ship->bullets.ptr[i], context);
@@ -57,7 +55,7 @@ void ship_shoot(Ship *ship) {
         return;
     }
 
-    ship->shoot_cooldown = 0.0f;
+    ship->shoot_cooldown = 0.3f;
 
     Bullet new_bullet = {
         .x_pos = ship->x_pos + (ship->image.width * ship->scale) / 2, .y_pos = ship->y_pos - 5, .width = 8, .height = 50, .color = (SDL_Color){.r = 0x0, .g = 0xFF, .b = 0x0, .a = 0xFF}, .out = false};

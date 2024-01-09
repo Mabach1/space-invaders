@@ -23,7 +23,7 @@ int main(void) {
     enemy_arr_init(&enemies, 8, 4, &game_context);
 
     Barricade barricade = {0};
-    barricade_init(&barricade, &game_context.window);
+    barricade_init(&barricade, &game_context);
 
     u64 last = SDL_GetPerformanceCounter();
 
@@ -90,7 +90,6 @@ int main(void) {
         }
 
         SDL_RenderClear(game_context.renderer);
-
         barricade_render(&barricade, &game_context);
 
         ship_display_lives(&ship, &game_context);
