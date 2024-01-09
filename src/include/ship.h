@@ -35,4 +35,11 @@ void ship_shoot(Ship *ship);
 void ship_update(Ship *ship, f64 delta_time);
 
 void ship_shot(Ship *ship, i32 window_width);
-void ship_display_lives(Ship *ship, Context *context);
+
+typedef struct ShipLivesIndicator {
+    Ship life_indicator[2];
+} ShipLivesIndicator;
+
+void ship_display_lives_init(ShipLivesIndicator *indicator, Ship *ship, Context *context);
+void ship_display_lives_destroy(ShipLivesIndicator *indicator);
+void ship_display_lives_render(ShipLivesIndicator *indicator, Ship *ship, Context *context);

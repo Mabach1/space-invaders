@@ -19,6 +19,9 @@ int main(void) {
     Ship ship = {0};
     ship_init(&ship, image_new("assets/ship.png", game_context.renderer), game_context.window.width / 2, (game_context.window.height / 12) * 10);
 
+    ShipLivesIndicator indicator = {0};
+    ship_display_lives_init(&indicator, &ship, &game_context);
+
     EnemyArr enemies = {0};
     enemy_arr_init(&enemies, 8, 4, &game_context);
 
@@ -92,7 +95,7 @@ int main(void) {
         SDL_RenderClear(game_context.renderer);
         barricade_render(&barricade, &game_context);
 
-        ship_display_lives(&ship, &game_context);
+        ship_display_lives_render(&indicator, &ship, &game_context);
         ship_render(&ship, &game_context);
 
         enemy_arr_render(&enemies, &game_context);
@@ -106,6 +109,7 @@ int main(void) {
         SDL_RenderPresent(game_context.renderer);
     }
 
+    ship_display_lives_destroy(&indicator);
     barricade_destroy(&barricade);
     enemy_arr_destroy(&enemies);
     ship_destroy(&ship);
