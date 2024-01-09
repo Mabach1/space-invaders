@@ -6,8 +6,8 @@ void ship_display_lives_init(ShipLivesIndicator *indicator, Ship *ship, Context 
     i32 ship_height = ship->image.height * ship->scale;
     i32 ship_width = ship->image.width * ship->scale;
 
-    ship_init(&indicator->life_indicator[0], image_new("assets/ship.png", context->renderer), 10.f, context->window.height - ship_height - 10.f);
-    ship_init(&indicator->life_indicator[1], image_new("assets/ship.png", context->renderer), 20.f + ship_width, context->window.height - ship_height - 10.f);
+    ship_init(&indicator->life_indicator[0], ship->image, 10.f, context->window.height - ship_height - 10.f);
+    ship_init(&indicator->life_indicator[1], ship->image, 20.f + ship_width, context->window.height - ship_height - 10.f);
 }
 
 void ship_display_lives_destroy(ShipLivesIndicator *indicator) {

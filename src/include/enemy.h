@@ -16,6 +16,8 @@ typedef enum AnimationState {
 typedef struct EnemyAnimation {
     Image fames[3];
     AnimationState state;
+    bool death_animation_played;
+    bool move_down_animation;
 } EnemyAnimation;
 
 typedef struct Enemy {
@@ -26,13 +28,9 @@ typedef struct Enemy {
     bool dead;
     f64 move_cooldown;
     i32 dir;
-    bool death_animation_played;
 } Enemy;
 
-EnemyAnimation enemy_animation_init(Context *context);
-void enemy_animation_destroy(EnemyAnimation *enemy_animation);
-
-Enemy enemy_new(f64 x, f64 y, Context *context);
+Enemy enemy_new(f64 x, f64 y, Context *context, Image *animation_frames);
 void enemy_delete(Enemy *enemy);
 
 void enemy_render(Enemy *enemy, Context *context);
