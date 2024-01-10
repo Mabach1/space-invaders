@@ -1,13 +1,11 @@
 #include "include/enemy.h"
 
+static const f64 ENEMY_MOVE_COOLDOWN = 0.2f;
+
 EnemyAnimation enemy_animation_init(Image *image, Context *context) {
     EnemyAnimation animation = {0};
 
     (void)context;
-
-    // animation.fames[0] = image_new("assets/enemy_frame_0.png", context->renderer);
-    // animation.fames[1] = image_new("assets/enemy_frame_1.png", context->renderer);
-    // animation.fames[2] = image_new("assets/enemy_frame_2.png", context->renderer);
 
     animation.fames[0] = image[0];
     animation.fames[1] = image[1];
@@ -27,30 +25,15 @@ void enemy_animation_destroy(EnemyAnimation *enemy_animation) {
 }
 
 Enemy enemy_new(f64 x, f64 y, Context *context, Image *animation_frames) {
-#if 1
     return (Enemy){
         .animation = enemy_animation_init(animation_frames, context),
         .scale = 0.15,
         .x_pos = x,
         .y_pos = y,
         .dead = false,
-        .move_cooldown = 0.8,
+        .move_cooldown = ENEMY_MOVE_COOLDOWN,
         .dir = 1,
     };
-#else
-    Enemy enemy = {0};
-
-    enemy.animation = enemy_animation_init(context);
-    enemy.scale = 0.15;
-    enemy.x_pos = x;
-    enemy.y_pos = y;
-    enemy.dead = false;
-    enemy.move_cooldown = 0.8;
-    enemy.dir = 1;
-    enemy.animation.death_animation_played = false;
-
-    return enemy;
-#endif
 }
 
 void enemy_delete(Enemy *enemy) { enemy_animation_destroy(&enemy->animation); }
@@ -98,15 +81,21 @@ void enemy_update(Enemy *enemy, f64 delta_time, i32 window_width, BulletVec *bul
         enemy->animation.state = (enemy->animation.state + 1) % 2;
     }
 
-    enemy->move_cooldown = 1.f;
+    enemy->move_cooldown = ENEMY_MOVE_COOLDOWN;
 
     f64 speed = enemy->dir * (enemy->animation.fames[0].width * enemy->scale / 2);
+
+    if (enemy->animation.move_down_animation) {
+        enemy_move_down(enemy);
+        enemy->animation.move_down_animation = false;
+        return;
+    }
 
     enemy->x_pos += speed;
 
     if (enemy->x_pos + enemy->animation.fames[0].width * enemy->scale + speed >= (f64)window_width || enemy->x_pos <= 0.f - speed) {
         enemy->dir *= -1;
-        enemy_move_down(enemy);
+        enemy->animation.move_down_animation = true;
     }
 }
 
@@ -194,7 +183,8 @@ void enemy_arr_update(EnemyArr *arr, f64 delta_time, Window *window, BulletVec *
     for (usize i = 0; i < arr->rows * arr->cols; ++i) {
         if (arr->ptr[i].dir != arr->dir) {
             arr->ptr[i].dir *= -1;
-            enemy_move_down(&arr->ptr[i]);
+            arr->ptr[i].animation.move_down_animation = true;
+            // enemy_move_down(&arr->ptr[i]);
         }
     }
 }

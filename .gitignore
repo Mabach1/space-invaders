@@ -1,0 +1,6 @@
+*.xml
+*.exe
+*.o
+*.i
+bin/*
+*.json
