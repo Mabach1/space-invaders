@@ -1,6 +1,6 @@
 #include "include/enemy.h"
 
-static const f64 ENEMY_MOVE_COOLDOWN = 0.2f;
+static const f64 ENEMY_MOVE_COOLDOWN = 0.6f;
 
 EnemyAnimation enemy_animation_init(Image *image, Context *context) {
     EnemyAnimation animation = {0};
@@ -27,11 +27,12 @@ void enemy_animation_destroy(EnemyAnimation *enemy_animation) {
 Enemy enemy_new(f64 x, f64 y, Context *context, Image *animation_frames) {
     return (Enemy){
         .animation = enemy_animation_init(animation_frames, context),
-        .scale = 0.15,
+        .scale = 0.1,
         .x_pos = x,
         .y_pos = y,
         .dead = false,
         .move_cooldown = ENEMY_MOVE_COOLDOWN,
+        .current_move_cooldown = ENEMY_MOVE_COOLDOWN,
         .dir = 1,
     };
 }
@@ -52,7 +53,11 @@ void enemy_render(Enemy *enemy, Context *context) {
 
 static void enemy_move_down(Enemy *enemy) { enemy->y_pos += (enemy->animation.fames[0].height * enemy->scale) / 2; }
 
-void enemy_update(Enemy *enemy, f64 delta_time, i32 window_width, BulletVec *bullet_vec) {
+void enemy_update(Enemy *enemy, f64 delta_time, i32 window_width, BulletVec *bullet_vec, u32 *death_count) {
+    if (enemy->animation.death_animation_played) {
+        return;
+    }
+
     for (usize i = 0; i < bullet_vec->len; ++i) {
         if (enemy->dead) {
             break;
@@ -61,15 +66,16 @@ void enemy_update(Enemy *enemy, f64 delta_time, i32 window_width, BulletVec *bul
         enemy->dead = enemy_shot(enemy, &bullet_vec->ptr[i]);
 
         if (enemy->dead) {
+            *death_count += 1;
             bullet_vec->ptr[i].out = true;
             enemy->animation.state = STATE_2;
             return;
         }
     }
 
-    enemy->move_cooldown -= delta_time;
+    enemy->current_move_cooldown -= delta_time;
 
-    if (enemy->move_cooldown > 0.f) {
+    if (enemy->current_move_cooldown > 0.f) {
         return;
     }
 
@@ -81,7 +87,7 @@ void enemy_update(Enemy *enemy, f64 delta_time, i32 window_width, BulletVec *bul
         enemy->animation.state = (enemy->animation.state + 1) % 2;
     }
 
-    enemy->move_cooldown = ENEMY_MOVE_COOLDOWN;
+    enemy->current_move_cooldown = enemy->move_cooldown;
 
     f64 speed = enemy->dir * (enemy->animation.fames[0].width * enemy->scale / 2);
 
@@ -120,9 +126,9 @@ void enemy_arr_init(EnemyArr *arr, usize cols, usize rows, Context *context) {
     };
 
     arr->dir = 1;
-
     arr->cols = cols;
     arr->rows = rows;
+    arr->number_of_deaths = 0;
 
     arr->ptr = malloc(sizeof(Enemy) * rows * cols);
     assert(arr->ptr);
@@ -132,8 +138,8 @@ void enemy_arr_init(EnemyArr *arr, usize cols, usize rows, Context *context) {
             usize index = coords(i, j, cols);
 
             arr->ptr[index] = enemy_new(0, 0, context, animation_images);
-            arr->ptr[index].y_pos = 1.2f * (context->window.height / 13 + (arr->ptr[index].animation.fames[0].height * arr->ptr[index].scale * i));
-            arr->ptr[index].x_pos = 1.1f * j * (arr->ptr[index].animation.fames[0].width * arr->ptr[index].scale) + 50.f;
+            arr->ptr[index].y_pos = 1.9f * (context->window.height / 25 + (arr->ptr[index].animation.fames[0].height * arr->ptr[index].scale * i));
+            arr->ptr[index].x_pos = 1.2f * j * (arr->ptr[index].animation.fames[0].width * arr->ptr[index].scale) + 50.f;
         }
     }
 }
@@ -154,12 +160,26 @@ void enemy_arr_render(EnemyArr *arr, Context *context) {
     }
 }
 
+static void change_cooldown_based_on_deaths(EnemyArr *arr) {
+    f64 factor = (f32)arr->number_of_deaths / (arr->cols * arr->rows);
+    f64 new_cooldown = (1.0 - factor) * ENEMY_MOVE_COOLDOWN;
+
+    if (new_cooldown <= ENEMY_MOVE_COOLDOWN / 6) {
+        return;
+    }
+
+    for (usize i = 0; i < arr->cols * arr->rows; ++i) {
+        arr->ptr[i].move_cooldown = new_cooldown;
+    }
+}
+
 void enemy_arr_update(EnemyArr *arr, f64 delta_time, Window *window, BulletVec *bullet_vec, Ship *ship) {
+    change_cooldown_based_on_deaths(arr);
     enemy_bullet_shoot(&arr->bullets, arr);
     enemy_bullet_vec_update(&arr->bullets, delta_time, ship, window);
 
     for (usize i = 0; i < arr->rows * arr->cols; ++i) {
-        enemy_update(&arr->ptr[i], delta_time, window->width, bullet_vec);
+        enemy_update(&arr->ptr[i], delta_time, window->width, bullet_vec, &arr->number_of_deaths);
     }
 
     bool dir_changed = false;
@@ -189,12 +209,17 @@ void enemy_arr_update(EnemyArr *arr, f64 delta_time, Window *window, BulletVec *
     }
 }
 
+static f64 calculate_new_shoot_cooldown(EnemyArr *arr) {
+    f64 factor = (f32)arr->number_of_deaths / (arr->cols * arr->rows);
+    return (1.0 - factor);
+}
+
 void enemy_bullet_shoot(EnemyBulletVec *bullet_vec, EnemyArr *enemies) {
     if (bullet_vec->cooldown > 0.f) {
         return;
     }
 
-    bullet_vec->cooldown = 1.5f;
+    bullet_vec->cooldown = calculate_new_shoot_cooldown(enemies);
 
     i32 random_index = rand() % (enemies->rows * enemies->cols);
 

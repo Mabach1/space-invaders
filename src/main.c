@@ -12,7 +12,7 @@ int main(void) {
 
     Context game_context = {0};
 
-    sdl_context_init(&game_context, "Space Invaders", 1800, 1350);
+    sdl_context_init(&game_context, "Space Invaders", 1200, 1500);
 
     SDL_Event event = {0};
 
@@ -23,7 +23,7 @@ int main(void) {
     ship_display_lives_init(&indicator, &ship, &game_context);
 
     EnemyArr enemies = {0};
-    enemy_arr_init(&enemies, 8, 4, &game_context);
+    enemy_arr_init(&enemies, 11, 5, &game_context);
 
     Barricade barricade = {0};
     barricade_init(&barricade, &game_context);

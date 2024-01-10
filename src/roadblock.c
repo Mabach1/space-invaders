@@ -172,7 +172,7 @@ Block block_new(const char *prefix_path, SDL_Renderer *renderer, f32 x, f32 y) {
 
     Block block = {0};
 
-    block.scale = 0.15f;
+    block.scale = 0.1f;
     block.x_pos = x;
     block.y_pos = y;
 
@@ -337,7 +337,7 @@ void barricade_init(Barricade *barricade, Context *context) {
     i32 right_offset = context->window.width / 20;
 
     for (usize i = 0; i < barricade->number_of; ++i) {
-        roadblock_init(&barricade->ptr[i], (i + 1) * right_offset + (i * 15.f * 21), context->window.height - 550.f, context);
+        roadblock_init(&barricade->ptr[i], (i + 1) * right_offset + (i * 15.f * 15), context->window.height - 450.f, context);
     }
 }
 

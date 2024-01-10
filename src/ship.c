@@ -1,6 +1,6 @@
 #include "include/ship.h"
 
-static const f32 SHIP_SCALE = 0.3;
+static const f32 SHIP_SCALE = 0.2;
 
 void ship_display_lives_init(ShipLivesIndicator *indicator, Ship *ship, Context *context) {
     i32 ship_height = ship->image.height * ship->scale;
@@ -50,11 +50,11 @@ void ship_move(Ship *ship, ShipDir dir, f64 delta_time, i32 window_width) {
     if (dir == ShipDirRight) {
         u32 right_limit = window_width - (window_width / 25) - (u32)(ship->image.width * ship->scale);
         if (ship->x_pos < right_limit) {
-            ship->x_pos += delta_time * 1000.f;
+            ship->x_pos += delta_time * 850.f;
         }
     } else if (dir == ShipDirLeft) {
         if (ship->x_pos > (u32)window_width / 25) {
-            ship->x_pos -= delta_time * 1000.f;
+            ship->x_pos -= delta_time * 850.f;
         }
     }
 }

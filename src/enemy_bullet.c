@@ -88,7 +88,7 @@ void enemy_bullet_vec_update(EnemyBulletVec *vec, f64 delta_time, Ship *ship, Wi
             continue;
         }
 
-        if (enemy_bullet_hit(&vec->ptr[i], ship)) {
+        if (enemy_bullet_hit(&vec->ptr[i], ship) && !ship->dead) {
             ship_shot(ship, window->width);
             vec->ptr[i].out = true;
         }

@@ -27,6 +27,7 @@ typedef struct Enemy {
     f64 y_pos;
     bool dead;
     f64 move_cooldown;
+    f64 current_move_cooldown;
     i32 dir;
 } Enemy;
 
@@ -34,7 +35,7 @@ Enemy enemy_new(f64 x, f64 y, Context *context, Image *animation_frames);
 void enemy_delete(Enemy *enemy);
 
 void enemy_render(Enemy *enemy, Context *context);
-void enemy_update(Enemy *enemy, f64 delta_time, i32 window_width, BulletVec *vec);
+void enemy_update(Enemy *enemy, f64 delta_time, i32 window_width, BulletVec *vec, u32 *death_count);
 
 bool enemy_shot(Enemy *enemy, Bullet *bullet);
 
@@ -44,6 +45,7 @@ typedef struct EnemyArr {
     usize rows;
     usize cols;
     i32 dir;
+    u32 number_of_deaths;
     EnemyBulletVec bullets;
 } EnemyArr;
 
