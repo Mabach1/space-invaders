@@ -54,6 +54,6 @@ void enemy_arr_init(EnemyArr *arr, usize cols, usize rows, Context *context);
 void enemy_arr_destroy(EnemyArr *arr);
 
 void enemy_arr_render(EnemyArr *arr, Context *context);
-void enemy_arr_update(EnemyArr *arr, f64 delta_time, Window *window, BulletVec *bullet_vec, Ship *ship);
+void enemy_arr_update(EnemyArr *arr, f64 delta_time, Context *context, BulletVec *bullet_vec, Ship *ship);
 
 void enemy_bullet_shoot(EnemyBulletVec *bullet_vec, EnemyArr *enemies);

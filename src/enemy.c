@@ -2,6 +2,21 @@
 
 static const f64 ENEMY_MOVE_COOLDOWN = 0.6f;
 
+static usize coords(usize row, usize col, usize cols) { return row * cols + col; }
+
+static void enemy_reset(EnemyArr *enemies, Context *context) {
+    for (usize i = 0; i < enemies->rows; ++i) {
+        for (usize j = 0; j < enemies->cols; ++j) {
+            usize index = coords(i, j, enemies->cols);
+            enemies->ptr[index].dead = false;
+            enemies->ptr[index].animation.state = STATE_0;
+            enemies->ptr[index].animation.death_animation_played = false;
+            enemies->ptr[index].y_pos = 1.9f * (context->window.height / 25 + (enemies->ptr[index].animation.fames[0].height * enemies->ptr[index].scale * i));
+            enemies->ptr[index].x_pos = 1.2f * j * (enemies->ptr[index].animation.fames[0].width * enemies->ptr[index].scale) + 50.f;
+        }      
+    }
+}
+
 EnemyAnimation enemy_animation_init(Image *image, Context *context) {
     EnemyAnimation animation = {0};
 
@@ -115,7 +130,6 @@ bool enemy_shot(Enemy *enemy, Bullet *bullet) {
                            bullet->x_pos <= enemy->x_pos + enemy->animation.fames[0].width * enemy->scale);
 }
 
-static usize coords(usize row, usize col, usize cols) { return row * cols + col; }
 
 void enemy_arr_init(EnemyArr *arr, usize cols, usize rows, Context *context) {
     enemy_bullet_vec_init(&arr->bullets);
@@ -174,16 +188,36 @@ static void change_cooldown_based_on_deaths(EnemyArr *arr) {
     }
 }
 
-void enemy_arr_update(EnemyArr *arr, f64 delta_time, Window *window, BulletVec *bullet_vec, Ship *ship) {
+void enemy_arr_update(EnemyArr *arr, f64 delta_time, Context *context, BulletVec *bullet_vec, Ship *ship) {
+    // for some reason, it cannot be done this way, the game just freeze
+    // if (arr->number_of_deaths == arr->cols * arr->rows) {
+    //     arr->number_of_deaths = 0;
+    //     enemy_reset(arr, context);
+    //     return;
+    // }
+
+    u32 count = 0;
+
+    for (usize i = 0; i < arr->cols * arr->rows; ++i) {
+        if (arr->ptr[i].dead && arr->ptr[i].animation.death_animation_played) {
+            count++;
+        }
+    }
+
+    if (count == arr->cols * arr->rows) {
+        enemy_reset(arr, context);
+        return;
+    }
+
     change_cooldown_based_on_deaths(arr);
     enemy_bullet_shoot(&arr->bullets, arr);
-    enemy_bullet_vec_update(&arr->bullets, delta_time, ship, window);
+    enemy_bullet_vec_update(&arr->bullets, delta_time, ship, &context->window);
 
     u32 curr_number_of_deaths = arr->number_of_deaths;
     u32 previous_number_of_deaths = arr->number_of_deaths;
 
     for (usize i = 0; i < arr->rows * arr->cols; ++i) {
-        enemy_update(&arr->ptr[i], delta_time, window->width, bullet_vec, &curr_number_of_deaths);
+        enemy_update(&arr->ptr[i], delta_time, context->window.width, bullet_vec, &curr_number_of_deaths);
 
         if (curr_number_of_deaths != previous_number_of_deaths) {
             previous_number_of_deaths = curr_number_of_deaths;

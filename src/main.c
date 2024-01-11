@@ -8,7 +8,6 @@
 #include "include/sdl.h"
 #include "include/ship.h"
 #include "include/background.h"
-#include "include/text.h"
 
 int main(void) {
     srand(time(NULL));
@@ -103,7 +102,7 @@ int main(void) {
 
         background_update(&background, delta_time);
         ship_update(&ship, delta_time);
-        enemy_arr_update(&enemies, delta_time, &game_context.window, &ship.bullets, &ship);
+        enemy_arr_update(&enemies, delta_time, &game_context, &ship.bullets, &ship);
         barricade_update(&barricade, &ship.bullets, &enemies.bullets);
         life_line_update(&life_line, &enemies.bullets);
 
