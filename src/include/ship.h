@@ -7,6 +7,7 @@
 #include "common.h"
 #include "image.h"
 #include "sdl.h"
+#include "text.h"
 
 typedef struct Ship {
     Image image;
@@ -18,6 +19,7 @@ typedef struct Ship {
     i8 lives;
     bool dead;
     f64 death_cooldown;
+    u64 score;
 } Ship;
 
 typedef enum ShipDir {
@@ -33,6 +35,7 @@ void ship_render(Ship *ship, Context *context);
 void ship_move(Ship *ship, ShipDir dir, f64 delta_time, i32 window_width);
 void ship_shoot(Ship *ship);
 void ship_update(Ship *ship, f64 delta_time);
+void ship_display_score(Ship *ship, TextBox *text_box, Context *context);
 
 void ship_shot(Ship *ship, i32 window_width);
 

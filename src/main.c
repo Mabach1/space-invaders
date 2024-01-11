@@ -8,6 +8,7 @@
 #include "include/sdl.h"
 #include "include/ship.h"
 #include "include/background.h"
+#include "include/text.h"
 
 int main(void) {
     srand(time(NULL));
@@ -35,6 +36,9 @@ int main(void) {
 
     LifeLine life_line = {0};
     life_line_init(&life_line, &game_context.window);
+
+    TextBox text_box = {0};
+    text_box_init(&text_box, (SDL_Color){.r = 0xFF, .g = 0xFF, .b = 0xFF, .a = 0xFF});
 
     u64 last = SDL_GetPerformanceCounter();
 
@@ -113,8 +117,10 @@ int main(void) {
             running = false;
         }
 
+
         SDL_RenderClear(game_context.renderer);
 
+        ship_display_score(&ship, &text_box, &game_context);
         background_render(&background, &game_context);
 
         barricade_render(&barricade, &game_context);
@@ -131,6 +137,7 @@ int main(void) {
         SDL_RenderPresent(game_context.renderer);
     }
 
+    text_box_destroy(&text_box);
     background_destroy(&background);
     life_line_destroy(&life_line);
     ship_display_lives_destroy(&indicator);

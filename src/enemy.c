@@ -24,7 +24,7 @@ void enemy_animation_destroy(EnemyAnimation *enemy_animation) {
     image_delete(&enemy_animation->fames[2]);
 }
 
-Enemy enemy_new(f64 x, f64 y, Context *context, Image *animation_frames) {
+Enemy enemy_new(f64 x, f64 y, Context *context, Image *animation_frames, u8 points) {
     return (Enemy){
         .animation = enemy_animation_init(animation_frames, context),
         .scale = 0.1,
@@ -34,6 +34,7 @@ Enemy enemy_new(f64 x, f64 y, Context *context, Image *animation_frames) {
         .move_cooldown = ENEMY_MOVE_COOLDOWN,
         .current_move_cooldown = ENEMY_MOVE_COOLDOWN,
         .dir = 1,
+        .points = points
     };
 }
 
@@ -137,7 +138,7 @@ void enemy_arr_init(EnemyArr *arr, usize cols, usize rows, Context *context) {
         for (usize j = 0; j < cols; ++j) {
             usize index = coords(i, j, cols);
 
-            arr->ptr[index] = enemy_new(0, 0, context, animation_images);
+            arr->ptr[index] = enemy_new(0, 0, context, animation_images, 100);
             arr->ptr[index].y_pos = 1.9f * (context->window.height / 25 + (arr->ptr[index].animation.fames[0].height * arr->ptr[index].scale * i));
             arr->ptr[index].x_pos = 1.2f * j * (arr->ptr[index].animation.fames[0].width * arr->ptr[index].scale) + 50.f;
         }
@@ -178,8 +179,16 @@ void enemy_arr_update(EnemyArr *arr, f64 delta_time, Window *window, BulletVec *
     enemy_bullet_shoot(&arr->bullets, arr);
     enemy_bullet_vec_update(&arr->bullets, delta_time, ship, window);
 
+    u32 curr_number_of_deaths = arr->number_of_deaths;
+    u32 previous_number_of_deaths = arr->number_of_deaths;
+
     for (usize i = 0; i < arr->rows * arr->cols; ++i) {
-        enemy_update(&arr->ptr[i], delta_time, window->width, bullet_vec, &arr->number_of_deaths);
+        enemy_update(&arr->ptr[i], delta_time, window->width, bullet_vec, &curr_number_of_deaths);
+
+        if (curr_number_of_deaths != previous_number_of_deaths) {
+            previous_number_of_deaths = curr_number_of_deaths;
+            ship->score += arr->ptr[i].points;
+        }
     }
 
     bool dir_changed = false;

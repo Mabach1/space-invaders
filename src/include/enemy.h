@@ -29,9 +29,10 @@ typedef struct Enemy {
     f64 move_cooldown;
     f64 current_move_cooldown;
     i32 dir;
+    u8 points;
 } Enemy;
 
-Enemy enemy_new(f64 x, f64 y, Context *context, Image *animation_frames);
+Enemy enemy_new(f64 x, f64 y, Context *context, Image *animation_frames, u8 points);
 void enemy_delete(Enemy *enemy);
 
 void enemy_render(Enemy *enemy, Context *context);

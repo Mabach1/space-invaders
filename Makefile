@@ -1,5 +1,5 @@
 CC := gcc
-CFLAGS := -g -O3 -Wall -Wextra -Wpedantic -Werror -fsanitize=address -lSDL2 -lSDL2_image
+CFLAGS := -g -O3 -Wall -Wextra -Wpedantic -Werror -fsanitize=address -lSDL2 -lSDL2_image -lSDL2_ttf
 SRC_DIR := src
 BUILD_DIR := bin
 

@@ -34,6 +34,7 @@ void ship_init(Ship *ship, Image image, f64 x, f64 y) {
     ship->lives = 3;
     ship->dead = false;
     ship->death_cooldown = 3.f;
+    ship->score = 0;
     bullet_vec_init(&ship->bullets);
 }
 
@@ -102,4 +103,11 @@ void ship_shot(Ship *ship, i32 window_width) {
     ship->lives -= 1;
     ship->dead = true;
     ship->x_pos = window_width / 25;
+}
+
+void ship_display_score(Ship *ship, TextBox *text_box, Context *context) {
+    char score_buf[255] = {0}; 
+    sprintf(score_buf, "%lu", ship->score);
+
+    text_box_draw(text_box, score_buf, -1, -1, context);
 }
