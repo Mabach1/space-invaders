@@ -232,7 +232,7 @@ void enemy_bullet_shoot(EnemyBulletVec *bullet_vec, EnemyArr *enemies) {
         .y_pos = enemies->ptr[random_index].y_pos + 5,
         .width = 8,
         .height = 50,
-        .color = (SDL_Color){.r = 0x0, .g = 0xFF, .b = 0x0, .a = 0xFF},
+        .color = (SDL_Color){.r = 0xFF, .g = 0xFF, .b = 0xDD, .a = 0xFF},
         .out = false,
     };
 

@@ -81,7 +81,7 @@ void ship_shoot(Ship *ship) {
     ship->shoot_cooldown = 0.3f;
 
     Bullet new_bullet = {
-        .x_pos = ship->x_pos + (ship->image.width * ship->scale) / 2, .y_pos = ship->y_pos - 5, .width = 8, .height = 50, .color = (SDL_Color){.r = 0x0, .g = 0xFF, .b = 0x0, .a = 0xFF}, .out = false};
+        .x_pos = ship->x_pos + (ship->image.width * ship->scale) / 2, .y_pos = ship->y_pos - 5, .width = 8, .height = 50, .color = (SDL_Color){.r = 0xFF, .g = 0xFF, .b = 0xFF, .a = 0xFF}, .out = false};
 
     bullet_vec_push(&ship->bullets, new_bullet);
 }

@@ -33,7 +33,7 @@ static void hit_area_render(HitArea *area, Context *context) {
 }
 
 void life_line_init(LifeLine *line, Window *window) {
-    line->color = (SDL_Color){.r = 0x00, .g = 0xFF, .b = 0x00, .a = 0xFF};
+    line->color = (SDL_Color){.r = 0xFF, .g = 0xFF, .b = 0xFF, .a = 0xFF};
 
     line->x_pos = 0;
     line->y_pos = window->height - window->height / 11;

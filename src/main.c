@@ -7,6 +7,7 @@
 #include "include/roadblock.h"
 #include "include/sdl.h"
 #include "include/ship.h"
+#include "include/background.h"
 
 int main(void) {
     srand(time(NULL));
@@ -16,6 +17,9 @@ int main(void) {
     sdl_context_init(&game_context, "Space Invaders", 1200, 1500);
 
     SDL_Event event = {0};
+
+    Background background = {0};
+    background_init(&background, &game_context);
 
     Ship ship = {0};
     ship_init(&ship, image_new("assets/ship.png", game_context.renderer), game_context.window.width / 2, (game_context.window.height / 12) * 10);
@@ -93,6 +97,7 @@ int main(void) {
             continue;
         }
 
+        background_update(&background, delta_time);
         ship_update(&ship, delta_time);
         enemy_arr_update(&enemies, delta_time, &game_context.window, &ship.bullets, &ship);
         barricade_update(&barricade, &ship.bullets, &enemies.bullets);
@@ -109,6 +114,9 @@ int main(void) {
         }
 
         SDL_RenderClear(game_context.renderer);
+
+        background_render(&background, &game_context);
+
         barricade_render(&barricade, &game_context);
 
         ship_display_lives_render(&indicator, &ship, &game_context);
@@ -123,6 +131,7 @@ int main(void) {
         SDL_RenderPresent(game_context.renderer);
     }
 
+    background_destroy(&background);
     life_line_destroy(&life_line);
     ship_display_lives_destroy(&indicator);
     barricade_destroy(&barricade);
