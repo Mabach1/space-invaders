@@ -126,7 +126,7 @@ int main(void) {
 
         life_line_render(&life_line, &game_context);
 
-        SDL_SetRenderDrawColor(game_context.renderer, 0, 0, 0, 255);
+        SDL_SetRenderDrawColor(game_context.renderer, 17, 19, 23, 255);
 
         SDL_RenderPresent(game_context.renderer);
     }
