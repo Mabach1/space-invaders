@@ -3,9 +3,10 @@
 #include <stdbool.h>
 
 #include "include/enemy.h"
+#include "include/line.h"
+#include "include/roadblock.h"
 #include "include/sdl.h"
 #include "include/ship.h"
-#include "include/roadblock.h"
 
 int main(void) {
     srand(time(NULL));
@@ -28,6 +29,9 @@ int main(void) {
     Barricade barricade = {0};
     barricade_init(&barricade, &game_context);
 
+    LifeLine life_line = {0};
+    life_line_init(&life_line, &game_context.window);
+
     u64 last = SDL_GetPerformanceCounter();
 
     struct Direction {
@@ -39,6 +43,7 @@ int main(void) {
 
     bool running = true;
     bool paused = false;
+    bool end = false;
 
     while (running) {
         while (SDL_PollEvent(&event)) {
@@ -68,12 +73,16 @@ int main(void) {
                     }
                     case SDLK_ESCAPE: {
                         // TODO: this will be changing scene to menu
-                        running = false;
+                        end = true;
                         // paused = paused ? false : true;
                         break;
                     }
                 }
             }
+        }
+
+        if (end) {
+            break;
         }
 
         u64 now = SDL_GetPerformanceCounter();
@@ -87,6 +96,13 @@ int main(void) {
         ship_update(&ship, delta_time);
         enemy_arr_update(&enemies, delta_time, &game_context.window, &ship.bullets, &ship);
         barricade_update(&barricade, &ship.bullets, &enemies.bullets);
+        life_line_update(&life_line, &enemies.bullets);
+
+        running = !game_over(&life_line, &enemies);
+
+        if (dir.pressed) {
+            ship_move(&ship, dir.dir, delta_time, game_context.window.width);
+        }
 
         if (ship.lives == 0) {
             running = false;
@@ -100,15 +116,14 @@ int main(void) {
 
         enemy_arr_render(&enemies, &game_context);
 
-        SDL_SetRenderDrawColor(game_context.renderer, 0, 0, 0, 255);
+        life_line_render(&life_line, &game_context);
 
-        if (dir.pressed) {
-            ship_move(&ship, dir.dir, delta_time, game_context.window.width);
-        }
+        SDL_SetRenderDrawColor(game_context.renderer, 0, 0, 0, 255);
 
         SDL_RenderPresent(game_context.renderer);
     }
 
+    life_line_destroy(&life_line);
     ship_display_lives_destroy(&indicator);
     barricade_destroy(&barricade);
     enemy_arr_destroy(&enemies);
