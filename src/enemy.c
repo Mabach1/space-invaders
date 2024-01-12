@@ -8,9 +8,18 @@ static void enemy_reset(EnemyArr *enemies, Context *context) {
     for (usize i = 0; i < enemies->rows; ++i) {
         for (usize j = 0; j < enemies->cols; ++j) {
             usize index = coords(i, j, enemies->cols);
+
+            // animation reset
+            enemies->ptr[index].animation.move_down_animation = false;
+            enemies->ptr[index].animation.death_animation_played = false;
+            enemies->ptr[index].current_move_cooldown = ENEMY_MOVE_COOLDOWN;
+            enemies->ptr[index].move_cooldown = ENEMY_MOVE_COOLDOWN;
+
             enemies->ptr[index].dead = false;
             enemies->ptr[index].animation.state = STATE_0;
-            enemies->ptr[index].animation.death_animation_played = false;
+            enemies->ptr[index].dir = 1;
+
+            // position reset
             enemies->ptr[index].y_pos = 1.9f * (context->window.height / 25 + (enemies->ptr[index].animation.fames[0].height * enemies->ptr[index].scale * i));
             enemies->ptr[index].x_pos = 1.2f * j * (enemies->ptr[index].animation.fames[0].width * enemies->ptr[index].scale) + 50.f;
         }      
@@ -205,6 +214,7 @@ void enemy_arr_update(EnemyArr *arr, f64 delta_time, Context *context, BulletVec
     }
 
     if (count == arr->cols * arr->rows) {
+        printf("reseting...\n");
         enemy_reset(arr, context);
         return;
     }

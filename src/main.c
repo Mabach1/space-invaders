@@ -2,12 +2,12 @@
 #include <SDL2/SDL_image.h>
 #include <stdbool.h>
 
+#include "include/background.h"
 #include "include/enemy.h"
 #include "include/line.h"
 #include "include/roadblock.h"
 #include "include/sdl.h"
 #include "include/ship.h"
-#include "include/background.h"
 
 int main(void) {
     srand(time(NULL));
@@ -55,7 +55,7 @@ int main(void) {
     while (running) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
-                running = false;
+                end = true;
             }
 
             if (event.type == SDL_KEYUP && event.key.keysym.sym != SDLK_SPACE) {
@@ -80,8 +80,8 @@ int main(void) {
                     }
                     case SDLK_ESCAPE: {
                         // TODO: this will be changing scene to menu
-                        end = true;
-                        // paused = paused ? false : true;
+                        // end = true;
+                        paused = paused ? false : true;
                         break;
                     }
                 }
@@ -97,12 +97,14 @@ int main(void) {
         last = now;
 
         if (paused) {
+            text_box_draw(&text_box, "HELLO MOM", 50.f, game_context.window.height / 2, &game_context);
+            SDL_RenderPresent(game_context.renderer);
             continue;
         }
 
+        enemy_arr_update(&enemies, delta_time, &game_context, &ship.bullets, &ship);
         background_update(&background, delta_time);
         ship_update(&ship, delta_time);
-        enemy_arr_update(&enemies, delta_time, &game_context, &ship.bullets, &ship);
         barricade_update(&barricade, &ship.bullets, &enemies.bullets);
         life_line_update(&life_line, &enemies.bullets);
 
@@ -115,7 +117,6 @@ int main(void) {
         if (ship.lives == 0) {
             running = false;
         }
-
 
         SDL_RenderClear(game_context.renderer);
 

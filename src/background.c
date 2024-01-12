@@ -8,7 +8,7 @@ void background_init(Background *background, Context *context) {
 void background_destroy(Background *background) { image_delete(&background->image); }
 
 void background_update(Background *background, f64 delta_time) {
-    background->progress += delta_time * 0.05;
+    background->progress += delta_time * 0.03;
     while (background->progress > 1.0) {
         background->progress -= 1.0;
     }
