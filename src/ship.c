@@ -107,7 +107,7 @@ void ship_shot(Ship *ship, i32 window_width) {
 
 void ship_display_score(Ship *ship, TextBox *text_box, Context *context) {
     char score_buf[255] = {0}; 
-    sprintf(score_buf, "%lu", ship->score);
+    sprintf(score_buf, "%04lu", ship->score);
 
     text_box_draw(text_box, score_buf, -1, -1, context);
 }

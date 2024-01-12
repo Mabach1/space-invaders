@@ -2,12 +2,18 @@
 #include <SDL2/SDL_image.h>
 #include <stdbool.h>
 
+#include "include/background.h"
 #include "include/enemy.h"
 #include "include/line.h"
 #include "include/roadblock.h"
 #include "include/sdl.h"
+#include "include/pause.h"
 #include "include/ship.h"
-#include "include/background.h"
+
+typedef enum Scene {
+    SceneGame,
+    ScenePause,
+} Scene;
 
 int main(void) {
     srand(time(NULL));
@@ -51,18 +57,35 @@ int main(void) {
     bool running = true;
     bool paused = false;
     bool end = false;
+    bool control_pressed = false;
 
     while (running) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
-                running = false;
+                end = true;
             }
 
             if (event.type == SDL_KEYUP && event.key.keysym.sym != SDLK_SPACE) {
                 dir.pressed = false;
             }
 
+            if (event.type == SDL_KEYUP && event.key.keysym.sym != SDLK_LCTRL) {
+                control_pressed = false;
+            }
+
             if (event.type == SDL_KEYDOWN) {
+                if (paused) {
+                    paused = false;
+                }
+
+                if (event.key.keysym.sym == SDLK_LCTRL ) {
+                    control_pressed = true;
+                }
+
+                if (control_pressed && event.key.keysym.sym == SDLK_w) {
+                    end = true;
+                }
+
                 switch (event.key.keysym.sym) {
                     case SDLK_LEFT: {
                         dir.pressed = true;
@@ -79,9 +102,7 @@ int main(void) {
                         break;
                     }
                     case SDLK_ESCAPE: {
-                        // TODO: this will be changing scene to menu
-                        end = true;
-                        // paused = paused ? false : true;
+                        paused = paused ? false : true;
                         break;
                     }
                 }
@@ -96,15 +117,15 @@ int main(void) {
         f64 delta_time = (f64)((now - last) / (f64)SDL_GetPerformanceFrequency());
         last = now;
 
-        if (paused) {
-            continue;
+        if (!paused) {
+            enemy_arr_update(&enemies, delta_time, &game_context, &ship.bullets, &ship);
+            background_update(&background, delta_time);
+            ship_update(&ship, delta_time);
+            barricade_update(&barricade, &ship.bullets, &enemies.bullets);
+            life_line_update(&life_line, &enemies.bullets);
         }
 
-        background_update(&background, delta_time);
-        ship_update(&ship, delta_time);
-        enemy_arr_update(&enemies, delta_time, &game_context, &ship.bullets, &ship);
-        barricade_update(&barricade, &ship.bullets, &enemies.bullets);
-        life_line_update(&life_line, &enemies.bullets);
+        SDL_RenderClear(game_context.renderer);
 
         running = !game_over(&life_line, &enemies);
 
@@ -116,11 +137,8 @@ int main(void) {
             running = false;
         }
 
-
-        SDL_RenderClear(game_context.renderer);
-
-        ship_display_score(&ship, &text_box, &game_context);
         background_render(&background, &game_context);
+        ship_display_score(&ship, &text_box, &game_context);
 
         barricade_render(&barricade, &game_context);
 
@@ -132,6 +150,9 @@ int main(void) {
         life_line_render(&life_line, &game_context);
 
         SDL_SetRenderDrawColor(game_context.renderer, 17, 19, 23, 255);
+
+        if (paused) 
+            scene_pause(game_context.renderer); 
 
         SDL_RenderPresent(game_context.renderer);
     }

@@ -8,9 +8,18 @@ static void enemy_reset(EnemyArr *enemies, Context *context) {
     for (usize i = 0; i < enemies->rows; ++i) {
         for (usize j = 0; j < enemies->cols; ++j) {
             usize index = coords(i, j, enemies->cols);
-            enemies->ptr[index].dead = false;
-            enemies->ptr[index].animation.state = STATE_0;
+
+            // animation reset
+            enemies->ptr[index].animation.move_down_animation = false;
             enemies->ptr[index].animation.death_animation_played = false;
+            enemies->ptr[index].current_move_cooldown = ENEMY_MOVE_COOLDOWN;
+            enemies->ptr[index].move_cooldown = ENEMY_MOVE_COOLDOWN;
+
+            enemies->ptr[index].dead = false;
+            enemies->ptr[index].animation.state = STATE_1;
+            enemies->ptr[index].dir = 1;
+
+            // position reset
             enemies->ptr[index].y_pos = 1.9f * (context->window.height / 25 + (enemies->ptr[index].animation.fames[0].height * enemies->ptr[index].scale * i));
             enemies->ptr[index].x_pos = 1.2f * j * (enemies->ptr[index].animation.fames[0].width * enemies->ptr[index].scale) + 50.f;
         }      
@@ -189,22 +198,8 @@ static void change_cooldown_based_on_deaths(EnemyArr *arr) {
 }
 
 void enemy_arr_update(EnemyArr *arr, f64 delta_time, Context *context, BulletVec *bullet_vec, Ship *ship) {
-    // for some reason, it cannot be done this way, the game just freeze
-    // if (arr->number_of_deaths == arr->cols * arr->rows) {
-    //     arr->number_of_deaths = 0;
-    //     enemy_reset(arr, context);
-    //     return;
-    // }
-
-    u32 count = 0;
-
-    for (usize i = 0; i < arr->cols * arr->rows; ++i) {
-        if (arr->ptr[i].dead && arr->ptr[i].animation.death_animation_played) {
-            count++;
-        }
-    }
-
-    if (count == arr->cols * arr->rows) {
+    if (arr->number_of_deaths == arr->cols * arr->rows) {
+        arr->number_of_deaths = 0;
         enemy_reset(arr, context);
         return;
     }
@@ -224,6 +219,8 @@ void enemy_arr_update(EnemyArr *arr, f64 delta_time, Context *context, BulletVec
             ship->score += arr->ptr[i].points;
         }
     }
+
+    arr->number_of_deaths = curr_number_of_deaths;
 
     bool dir_changed = false;
 
@@ -254,7 +251,7 @@ void enemy_arr_update(EnemyArr *arr, f64 delta_time, Context *context, BulletVec
 
 static f64 calculate_new_shoot_cooldown(EnemyArr *arr) {
     f64 factor = (f32)arr->number_of_deaths / (arr->cols * arr->rows);
-    return (1.0 - factor);
+    return (1.0 - factor) / 0.35;
 }
 
 void enemy_bullet_shoot(EnemyBulletVec *bullet_vec, EnemyArr *enemies) {

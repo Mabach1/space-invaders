@@ -2,7 +2,7 @@
 
 void text_box_init(TextBox *text_box, SDL_Color color) {
     TTF_Init();
-    text_box->font = TTF_OpenFont("assets/Arial.ttf", 60);
+    text_box->font = TTF_OpenFont("assets/Roboto-Medium.ttf", 60);
     text_box->color = color;
 }
 

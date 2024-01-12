@@ -2,6 +2,7 @@
 
 void sdl_context_init(Context *context, const char *game_name, const i32 width, const i32 height) {
     SDL_Init(SDL_INIT_VIDEO);
+    IMG_Init(IMG_INIT_PNG);
 
     context->window.width = width;
     context->window.height = height;
